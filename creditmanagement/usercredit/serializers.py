@@ -61,7 +61,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
-
 ####### USER PROFILE VIEW #########
  
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -91,7 +90,6 @@ class USerChangePasswordSerializer(serializers.Serializer):
         user.save()
         return super().validate(attrs)
 
-        
 ###### ADMIN REGISTER ########
 
 class AdminRegisterSerializer(serializers.ModelSerializer):
