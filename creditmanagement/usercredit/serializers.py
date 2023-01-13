@@ -69,7 +69,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ['first_name', 'last_name','email', 'phone_no', 'aadhar', 'pan', 'cheque', 'tc' ]
 
-
 ######## USER CHANGE PASSWORD #########
 
 class USerChangePasswordSerializer(serializers.Serializer):
