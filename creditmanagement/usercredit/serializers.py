@@ -34,7 +34,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         
         return User.objects.create_user(**validated_data)
 
-
 ######### LOGIN SERIALIZER ##########
 
 class LoginSerializer(serializers.ModelSerializer):
@@ -42,7 +41,6 @@ class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'password']
-
 
 ####### RESEND OTP #########
 
