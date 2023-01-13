@@ -47,13 +47,11 @@ class LoginSerializer(serializers.ModelSerializer):
 class ResendOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     
-
 ####### VERIFY ACCOUNT #########
 
 class VerifyAccountSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp  = serializers.CharField()
-
 
 ######## USER LIST #########
 
