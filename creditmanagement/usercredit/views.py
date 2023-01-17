@@ -12,6 +12,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from usercredit.decode import get_object
 from django_filters.rest_framework import DjangoFilterBackend
 from .utils import *
+from datetime import datetime
+from django.utils import timezone
+# from django.utils.timezone import 
 
 ### Create your views here. ###
 
@@ -40,21 +43,24 @@ class UserListGeneric(generics.ListAPIView):
 @authentication_classes([])
 @permission_classes([])
 class RegisterUser(APIView):
+
     def post(self, request):
         if not request.POST._mutable:
             request.POST._mutable = True
         try:
-            get_code = User.objects.get(refer_code=request.data['refer_code'])
-            request.data['referred_by'] = get_code.id
+            user = User.objects.get(refer_code=request.data['refer_code'])
+            request.data['referred_by'] = user.id
         except:
             return Response({"message":"Invalid Referral Code"})
         try:
             request.data['refer_code'] = generate_ref_code()
+
             serializer = UserRegistrationSerializer(data=request.data)
     
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
                 send_otp_via_email(serializer.data['email'])
+                
                 return Response({'status': True, 'message': 'Registration Successful. Please check your email for verification'})
         except:
             return Response({"error":serializer.errors,"message":"Something went wrong"})
@@ -87,12 +93,18 @@ class UserProfileView(APIView):
         return Response({"status": True, "data": serializer.data})
 
     def put(self, request):
+        if not request.POST._mutable:
+            request.POST._mutable = True
         user= get_object(request)
         request.data["user_id"] = user.id
         serializer = UserProfileSerializer(user, data=request.data)
+
         if not serializer.is_valid():
             return Response({'status': False, 'errors': serializer.errors, 'message': 'something went wrong'})
+        now = datetime.now()
+        user.user_modified_at = now
         serializer.save()
+
         return Response({'status': True, "data": serializer.data,  'message': 'Your data is updated'})
 
     def delete(self, request):

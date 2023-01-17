@@ -32,9 +32,4 @@ urlpatterns = [
     path('reset-password-email/', SendResetPasswordEmail.as_view()),
     path('reset-password/<uid>/<token>/', PasswordResetView.as_view()),
 
-    # ####### ADD COMMISSION ######
-
-    # path('add-commission/<id>/', CommisionAPI.as_view()),
-
-
 ]

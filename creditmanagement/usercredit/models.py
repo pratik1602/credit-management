@@ -6,6 +6,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 percentage_validators=[MinValueValidator(0.9), MaxValueValidator(100)]
 from django.conf import settings
 from usercredit.utils import *
+from django.utils import timezone
 
 # Create your models here.
 
@@ -37,16 +38,19 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     tc = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, null=True, blank=True)
-    refer_code = models.CharField(max_length=8, blank=True)
+    refer_code = models.CharField(max_length=8, blank=True, null=True)
     referred_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='usercredit_User_referred_by')
     commission_status = models.BooleanField(default=False)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='usercredit_User_created_by')
     modified_by =  models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='usercredit_User_modified_by')
-
+    user_created_at = models.DateTimeField(default=datetime.now)
+    user_modified_at = models.DateTimeField(default=datetime.now)
+    
     USERNAME_FIELD =  'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_no', ]
 
     objects = UserManager()
+
 
     def has_perm(self, perm, obj=None):
         return self.is_admin
@@ -84,6 +88,8 @@ class Card(models.Model):
     created_by=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_by_user',on_delete=models.PROTECT,  null=True, blank=True)
     paid_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='paid_by_user', on_delete=models.PROTECT, null=True, blank=True) 
     commission_total_amount = models.FloatField(null=True,blank=True)
+    created_at = models.DateTimeField(default= datetime.now)
+    modified_at = models.DateTimeField(default=datetime.now)
 
     def __str__(self):
         return self.card_bank_name      

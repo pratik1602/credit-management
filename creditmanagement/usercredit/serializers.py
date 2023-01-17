@@ -121,12 +121,15 @@ class AdminRegisterSerializer(serializers.ModelSerializer):
 
 class ResetPasswordEmailSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255)
+    phone_no = serializers.CharField(max_length =12, required = False)
 
     class Meta:
-        fields = ['email']
+        fields = ['email', 'phone_no']
+
 
     def validate(self, attrs):
         email = attrs.get('email')
+
         if User.objects.filter(email=email).exists():
             user = User.objects.get(email =email)
             uid = urlsafe_base64_encode(force_bytes(user.id))

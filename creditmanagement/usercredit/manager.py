@@ -2,7 +2,7 @@ from django.contrib.auth.models import BaseUserManager
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, password=None, password2=None, first_name=None, last_name=None, phone_no=None, aadhar=None, pan=None, cheque=None, role=None, created_by=None, refer_code=None, referred_by=None):
+    def create_user(self, email, password=None, password2=None, first_name=None, last_name=None, phone_no=None, aadhar=None, pan=None, cheque=None, role=None, created_by=None, refer_code=None, referred_by=None,):
         """
         Creates and saves a User with the given email and password.
         """
@@ -20,7 +20,7 @@ class UserManager(BaseUserManager):
             role=role,
             refer_code=refer_code,
             referred_by = referred_by,
-            created_by=created_by
+            created_by=created_by,
         )
         user.set_password(password)
         user.save(using=self._db)

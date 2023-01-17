@@ -42,11 +42,12 @@ class UserCardAPIView(APIView):
         serializer = CardSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(created_by=self.request.user)
-            return Response({'status': True, "message": "Card Added Successfully", "data": serializer.data})
+            return Response({'status': True, "message": "Card Added Successfully"})
         return Response({'status': False, "message": "something went wrong", "errors": serializer.errors})
 
     def put(self, request, card_id):
         try:
+            now = datetime.now()
             user = get_object(request)
             request.data["user_id"] = user.id
             card_obj = Card.objects.get(card_id=card_id, user_id=user.id)
@@ -67,6 +68,8 @@ class UserCardAPIView(APIView):
             card_obj.commission_total_amount = "%.2f" % float(commission_amount)
             card_obj.updated_by = request.user
             card_obj.paid_by = request.user
+
+            card_obj.modified_at = now
 
             card_obj.save()
             return Response({"status":True, "data":request.data, "message":"Data Updated"})
