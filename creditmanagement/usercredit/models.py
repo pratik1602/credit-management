@@ -6,11 +6,12 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 percentage_validators=[MinValueValidator(0.9), MaxValueValidator(100)]
 from django.conf import settings
 from usercredit.utils import *
-from django.utils import timezone
+from django.contrib.auth.models import PermissionsMixin
+# from django.utils import timezone
 
 # Create your models here.
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser,PermissionsMixin):
 
     ADMIN = 1
     USER = 2

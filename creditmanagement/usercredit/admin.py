@@ -3,12 +3,12 @@ from .models import *
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from datetime import datetime
-# from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group
 
 # Register your models here.
 
 User  = get_user_model()
-# admin.site.register(Group)
+admin.site.unregister(Group)
 
 
 class UserAdmin(BaseUserAdmin):
@@ -18,7 +18,9 @@ class UserAdmin(BaseUserAdmin):
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
     list_display = ['id','email','aadhar_status','pan_status','cheque_status','is_admin', 'is_verified', 'role', 'commission_status']
-    list_filter = []
+    list_filter = ['role', 'email',]
+    list_editable = ['aadhar_status','pan_status','cheque_status','is_verified']
+    list_per_page = 6
     fieldsets = (
         ('User Credentials', {'fields': ('email','password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'phone_no', 'aadhar','aadhar_status','pan','pan_status','cheque','cheque_status','otp' ,'refer_code','referred_by','tc', 'commission_status','user_created_at','user_modified_at')}),
@@ -58,13 +60,10 @@ admin.site.register(User, UserAdmin)
 ########## CARDS ADMIN #########
 
 class CardsAdmin(admin.ModelAdmin):
-    list_display = ['card_id', 'card_holder_name','card_type','card_exp_date','due_date', 'due_amount', 'commission','commission_total_amount', 'card_status','paid_by']
-    # fieldsets = (
-    #     ('Personal info', {'fields': ('card_holder_name','card_type','card_exp_date','due_date', 'due_amount', 'commission','commission_total_amount', 'card_status','paid_by')}),
-    # )
-    list_filter = ('card_status', )
+    list_display = ['card_id', 'card_holder_name','card_type','due_date', 'due_amount', 'commission','commission_total_amount', 'card_status','paid_by']
+    list_filter = ('card_status', 'card_type' )
     search_fields = ('card_holder_name',)
-    add_fieldsets = (({'fields': ('commission')}))
+    # add_fieldsets = (({'fields': ('commission')}))
     readonly_fields = ('created_at','modified_at',)
     ordering = ('card_id',)
 
@@ -84,9 +83,6 @@ class CardsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Card, CardsAdmin)
-
-
-
 
 
 
