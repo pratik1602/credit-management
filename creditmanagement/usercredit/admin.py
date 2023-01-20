@@ -20,7 +20,7 @@ class UserAdmin(BaseUserAdmin):
     list_display = ['id','email','aadhar_status','pan_status','cheque_status','is_admin', 'is_verified', 'role', 'commission_status']
     list_filter = ['role', 'email',]
     list_editable = ['aadhar_status','pan_status','cheque_status','is_verified']
-    list_per_page = 6
+    list_per_page = 10
     fieldsets = (
         ('User Credentials', {'fields': ('email','password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'phone_no', 'aadhar','aadhar_status','pan','pan_status','cheque','cheque_status','otp' ,'refer_code','referred_by','tc', 'commission_status','user_created_at','user_modified_at')}),
@@ -60,12 +60,13 @@ admin.site.register(User, UserAdmin)
 ########## CARDS ADMIN #########
 
 class CardsAdmin(admin.ModelAdmin):
-    list_display = ['card_id', 'card_holder_name','card_type','due_date', 'due_amount', 'commission','commission_total_amount', 'card_status','paid_by']
+    list_display = ['card_id', 'card_holder_name','card_type','due_date', 'due_amount', 'commission','commission_total_amount', 'paid_by','card_status']
     list_filter = ('card_status', 'card_type' )
     search_fields = ('card_holder_name',)
-    # add_fieldsets = (({'fields': ('commission')}))
+    list_editable = ['commission', 'card_status']
     readonly_fields = ('created_at','modified_at',)
     ordering = ('card_id',)
+    list_per_page = 10
 
     def save_model(self, request, obj, form, change):
         
@@ -83,18 +84,4 @@ class CardsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Card, CardsAdmin)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

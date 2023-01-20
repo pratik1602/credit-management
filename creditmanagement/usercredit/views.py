@@ -13,8 +13,6 @@ from usercredit.decode import get_object
 from django_filters.rest_framework import DjangoFilterBackend
 from .utils import *
 from datetime import datetime
-from django.utils import timezone
-# from django.utils.timezone import 
 
 ### Create your views here. ###
 
