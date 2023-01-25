@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 
+import os
+
 import environ
 
 env = environ.Env()
@@ -31,7 +33,7 @@ SECRET_KEY = 'django-insecure-t2c5md0n32ea+p#x=3+h+th%*9t^uqtjxjv4v9me)d$p)!*-wh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -62,6 +64,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 ROOT_URLCONF = 'creditmanagement.urls'
 
@@ -165,8 +169,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-import os
 
 STATIC_ROOT = 'staticfiles'
 STATIC_URL = '/static/'

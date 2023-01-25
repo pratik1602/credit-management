@@ -42,15 +42,12 @@ class UserAdmin(BaseUserAdmin):
 
     def save_model(self, request, obj, form, change):
         time_date = datetime.now()
-        print("abc",time_date)
         if change:
             obj.modified_by = request.user
             obj.user_modified_at = time_date
 
         else:                    
             obj.created_by = request.user
-
-
 
         obj.save()                         
         return super(UserAdmin, self).save_model(request, obj, form, change)

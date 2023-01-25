@@ -7,7 +7,6 @@ percentage_validators=[MinValueValidator(0.9), MaxValueValidator(100)]
 from django.conf import settings
 from usercredit.utils import *
 from django.contrib.auth.models import PermissionsMixin
-# from django.utils import timezone
 
 # Create your models here.
 
@@ -68,6 +67,7 @@ class User(AbstractBaseUser,PermissionsMixin):
             self.refer_code = refer_code
         super().save(*args, **kwargs)
 
+
 class Card(models.Model):  
 
     card_id = models.AutoField(primary_key=True)
@@ -89,6 +89,7 @@ class Card(models.Model):
     created_by=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_by_user',on_delete=models.PROTECT,  null=True, blank=True)
     paid_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='paid_by_user', on_delete=models.PROTECT, null=True, blank=True) 
     commission_total_amount = models.FloatField(null=True,blank=True)
+    commission_paid_through = models.CharField(max_length=100)
     created_at = models.DateTimeField(default= datetime.now)
     modified_at = models.DateTimeField(default=datetime.now)
 
