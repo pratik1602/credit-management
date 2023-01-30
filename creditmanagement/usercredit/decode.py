@@ -2,9 +2,7 @@ from .models import User
 import jwt
 from creditmanagement.settings import SECRET_KEY
 
-
 JWT_ALGORITHM = "HS256"
-
 
 def get_object(request): 
     gettoken =  request.META.get('HTTP_AUTHORIZATION', None)
