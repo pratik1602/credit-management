@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 
 import environ
+import dj_database_url
 
 env = environ.Env()
 environ.Env.read_env()
@@ -118,16 +119,21 @@ REST_FRAMEWORK = {
 #     }
 # }
 
+# DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': 'creditmanagementsystem',
+#        'USER': 'postgres',
+#        'PASSWORD': '123456',
+#        'HOST': '127.0.0.1',
+#        'PORT': '5432',
+#    }
+# }
+
+
 DATABASES = {
-   'default': {
-       'ENGINE': 'django.db.backends.postgresql',
-       'NAME': 'creditmanagementsystem',
-       'USER': 'postgres',
-       'PASSWORD': '123456',
-       'HOST': '127.0.0.1',
-       'PORT': '5432',
-   }
-}
+    "default": dj_database_url.parse(os.environ.get("DATABASE_URL"))
+ }
 
 
 # Password validation
