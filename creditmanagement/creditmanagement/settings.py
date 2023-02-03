@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-t2c5md0n32ea+p#x=3+h+th%*9t^uqtjxjv4v9me)d$p)!*-wh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -88,10 +88,12 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'creditmanagement.wsgi.application'
+WSGI_APPLICATION = 'creditmanagement.wsgi.application' 
 
-#jwt Config
 
+DATABASES = {
+    "default": dj_database_url.parse(os.environ.get("DATABASE_URL"))
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -131,9 +133,6 @@ REST_FRAMEWORK = {
 # }
 
 
-DATABASES = {
-    "default": dj_database_url.parse(os.environ.get("DATABASE_URL"))
- }
 
 
 # Password validation
