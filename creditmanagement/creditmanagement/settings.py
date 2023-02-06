@@ -88,7 +88,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'creditmanagement.wsgi.app' 
+WSGI_APPLICATION = 'creditmanagement.wsgi.application' 
 
 
 DATABASES = {
