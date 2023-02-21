@@ -13,6 +13,8 @@ from usercredit.decode import get_object
 from django_filters.rest_framework import DjangoFilterBackend
 from .utils import *
 from datetime import datetime
+from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth import logout
 
 ### Create your views here. ###
 
@@ -20,10 +22,8 @@ from datetime import datetime
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
-    return {
-        'refresh': str(refresh),
-        'access': str(refresh.access_token),
-    }
+    return str(refresh.access_token)
+    
 
 ####### USER VIEWS ######
 
@@ -36,7 +36,7 @@ class UserListGeneric(generics.ListAPIView):
     filterset_fields = ['id',]
 
 
-######### REGISTRATION #########
+######### REGISTRATION - USER #########
 
 @authentication_classes([])
 @permission_classes([])
@@ -45,8 +45,9 @@ class RegisterUser(APIView):
     def post(self, request):
         if not request.POST._mutable:
             request.POST._mutable = True
+        data = request.data
         try:
-            user = User.objects.get(refer_code=request.data['refer_code'])
+            user = User.objects.get(refer_code=data['refer_code'])
             request.data['referred_by'] = user.id
         except:
             return Response({"message":"Invalid Referral Code"})
@@ -59,9 +60,9 @@ class RegisterUser(APIView):
                 serializer.save()
                 send_otp_via_email(serializer.data['email'])
                 
-                return Response({'status': True, 'message': 'Registration Successful. Please check your email for verification'})
+                return Response({"Status": True, "Message": 'Registration Successful. Please check your email for verification', "Data": serializer.data})
         except:
-            return Response({"error":serializer.errors,"message":"Something went wrong"})
+            return Response({"Data":serializer.errors,"Message":"Something went wrong", "Status":False})
        
         
 ###### ADMIN REGISTER API ########
@@ -70,13 +71,18 @@ class RegisterUser(APIView):
 @permission_classes([])
 class RegisterAdmin(APIView):
     def post (self, request):
-        serializer = AdminRegisterSerializer(data=request.data)
-
-        if not serializer.is_valid():
-            return Response ({'status': False, 'errors' : serializer.errors, 'message': 'something went wrong'})
-        serializer.save()
-        send_otp_via_email(serializer.data['email'])
-        return Response ({'status': True , 'message': 'Registration Successful. Please check your email for verification'})
+        data = request.data
+        serializer = AdminRegisterSerializer(data=data)
+        mobile = data['phone_no']
+        if serializer.is_valid():
+            user = User.objects.filter(phone_no=mobile)
+            if user.exists():
+                return Response({"Status":False, "Message":"Mobile number already exists !!!"}) 
+            serializer.save()
+            send_otp_via_email(serializer.data['email'])
+            return Response ({'Status': True , 'Message': 'Registration Successful. Please check your email for verification', "Data":serializer.data})
+        else:
+            return Response({"Data":serializer.errors}) 
 
 
 ######## USER PROFILE VIEW, UPDATE AND DELETE ############
@@ -87,23 +93,66 @@ class UserProfileView(APIView):
     def get(self,  request):
         user = get_object(request)
         request.data["user_id"] = user.id
-        serializer = UserProfileSerializer(user)
-        return Response({"status": True, "data": serializer.data})
+        if user:
+            serializer = UserProfileSerializer(user)
+            return Response({"Status": True, "Data": serializer.data})
+        else:
+            return Response({"Status": False, "Message":"User not found !!!"})
+
+    def put(self, request):
+        if not request.POST._mutable:
+            request.POST._mutable = True
+        data = request.data
+        user= get_object(request)
+        request.data["user_id"] = user.id
+        serializer = UserProfileSerializer(user, data=data)
+
+        if not serializer.is_valid():
+            return Response({'Status': False, 'Data': serializer.errors, 'Message': 'something went wrong'})
+        now = datetime.now()
+        user.user_modified_at = now
+        serializer.save()
+
+        return Response({'Status': True, "Data": serializer.data,  'Message': 'Your data is updated'})
+
+    def delete(self, request):
+        try:
+            user = get_object(request)
+            request.data["user_id"] = user.id
+            user_obj = User.objects.get(id=user.id)
+            if user_obj is not None:
+                user.delete()
+                return Response({"Status":True, "Message": "Account deleted"})
+        except Exception as e:
+            print(e) 
+            return Response({"Status":False, "Message": "Account not found"})             
+ 
+
+###### ADMIN CRUD ######
+
+class AdminProfileView(APIView):
+    permission_classes = [IsAuthenticated&IsAdminUser]
+
+    def get(self,  request):
+        user = get_object(request)
+        request.data["user_id"] = user.id
+        serializer = AdminProfileSerializer(user)
+        return Response({"Status": True, "Data": serializer.data})
 
     def put(self, request):
         if not request.POST._mutable:
             request.POST._mutable = True
         user= get_object(request)
         request.data["user_id"] = user.id
-        serializer = UserProfileSerializer(user, data=request.data)
+        serializer = AdminProfileSerializer(user, data=request.data)
 
         if not serializer.is_valid():
-            return Response({'status': False, 'errors': serializer.errors, 'message': 'something went wrong'})
+            return Response({'Status': False, 'Data': serializer.errors, 'Message': 'something went wrong'})
         now = datetime.now()
         user.user_modified_at = now
         serializer.save()
 
-        return Response({'status': True, "data": serializer.data,  'message': 'Your data is updated'})
+        return Response({'Status': True, "Data": serializer.data,  'Message': 'Your data is updated'})
 
     def delete(self, request):
         try:
@@ -113,11 +162,11 @@ class UserProfileView(APIView):
             print("user", user)
             if user_obj is not None:
                 user.delete()
-                return Response({"status":True, "message": "Account deleted"})
+                return Response({"Status":True, "Message": "Account deleted"})
         except Exception as e:
             print(e) 
-            return Response({"status":False, "message": "Account not found"})             
- 
+            return Response({"Status":False, "Message": "Account not found"})
+
 
 ######## DELETE USER - ADMIN ONLY ############ (PASS PARAMETER)
 
@@ -129,10 +178,10 @@ class DeleteUserView(APIView):
             id = request.GET.get('id')    
             user = User.objects.get(id=id)
             user.delete()
-            return Response({'status':True,'message':"User Deleted Successfully"})
+            return Response({'Status':True,'Message':"User Deleted Successfully"})
         except Exception as e:
             print(e)
-            return Response({'status':False, 'message':"Invalid User Id"})
+            return Response({'Status':False, 'Message':"Invalid User Id"})
 
 
 ######## LOGIN USER #############
@@ -148,17 +197,17 @@ class LoginAPIView(APIView):
             user = authenticate(email=email, password=password) 
             if user is not None and user.is_verified:
                 token=  get_tokens_for_user(user)
-                return Response({'status':True, 'token': token, 'message':"Login successful"})
+                return Response({'Status':True, 'Data': {"token": token}, 'Message':"Login successful"})
             elif user is None:
-                return Response({'status':False,'message':"Invalid credentials"}) 
+                return Response({'Status':False,'Message':"Invalid credentials"}) 
             else:
                 send_otp_via_email(serializer.data['email'])
-                return Response({'status':False,'message':"You are not a verified user!!! Please check your email and get verified"})
+                return Response({'Status':False,'Message':"You are not a verified user!!! Please check your email and get verified"})
              
-        return Response({'status':False, 'errors':serializer.errors,'message':"something went wrong"})
+        return Response({'Status':False, 'Data':serializer.errors,'Message':"something went wrong"})
 
 
-###### VERIFY USER #########
+###### VERIFY USER WITH OTP #########
 
 @authentication_classes([])
 @permission_classes([])
@@ -172,17 +221,17 @@ class VerifyOTP(APIView):
 
                 user = User.objects.filter(email=email)
                 if not user.exists():
-                    return Response({'status': False, 'data': "Invalid Email", 'message': "Something went wrong"})
+                    return Response({'Status': False, 'Data': "Invalid Email", 'Message': "Something went wrong !!!"})
 
                 if user[0].otp != otp:
-                    return Response({'status': False, 'data': "Invalid OTP", 'message': "Something went wrong"})
+                    return Response({'Status': False, 'Data': "Invalid OTP or Doesn't Match", 'Message': "Something went wrong !!!"})
 
                 user = user.first()
                 user.is_verified = True
                 user.save()
 
-                return Response({'status': True,  'message': "Account Verified"})
-            return Response({'status': True, 'errors': serializer.errors, 'message': "Something went wrong"})
+                return Response({'Status': True,  'Message': "Account Verified Successfully !!!"})
+            return Response({'Status': True, 'Data': serializer.errors, 'Message': "Something went wrong"})
         except Exception as e:
             print(e)
 
@@ -201,18 +250,18 @@ class VerifyAdminOTP(APIView):
 
                 user = User.objects.filter(email=email)
                 if not user.exists():
-                    return Response({'status': False, 'data': "Invalid Email", 'message': "Something went wrong"})
+                    return Response({'Status': False, 'Data': "Invalid Email", 'Message': "User not found !!!"})
 
                 if user[0].otp != otp:
-                    return Response({'status': False, 'data': "Invalid OTP", 'message': "Something went wrong"})
+                    return Response({'Status': False, 'Data': "Invalid OTP", 'Message': "Something went wrong"})
 
                 user = user.first()
                 user.is_verified = True
                 user.is_admin = True
                 user.is_staff = True
                 user.save()
-                return Response({'status': True,  'message': "Account Verified"})
-            return Response({'status': False, 'errors': serializer.errors, 'message': "Something went wrong"})
+                return Response({'Status': True,  'Message': "Account Verified Successfully !!!"})
+            return Response({'Status': False, 'Data': serializer.errors, 'Message': "Something went wrong"})
         except Exception as e:
             print(e)
 
@@ -225,15 +274,14 @@ class ResendOTP(APIView):
     def post(self, request):
         try:
             serializer = ResendOTPSerializer(data=request.data)
-
             if serializer.is_valid():
                 email = serializer.data['email']
                 user = User.objects.filter(email=email)
                 if not user.exists():
-                    return Response({'status': False, 'data': "Invalid Email", 'message': "Something went wrong"})
+                    return Response({'Status': False, 'Data': "Invalid Email", 'Message': "Something went wrong"})
                 send_otp_via_email(serializer.data['email'])
-                return Response({'status': True,  'message': "Please check your email"})
-            return Response({'status': False, 'data': serializer.errors, 'message': "Something went wrong"})
+                return Response({'Status': True,  'Message': "Please check your email again !!!"})
+            return Response({'Status': False, 'Data': serializer.errors, 'Message': "Something went wrong"})
 
         except Exception as e:
             print(e)
@@ -245,12 +293,26 @@ class UserChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
-        serializer = USerChangePasswordSerializer(
-            data=request.data, context={'user': request.user})
-        if serializer.is_valid():
-            return Response({'status': True,  "message": "Password changed successfully"})
+        user = get_object(request)
+        data = request.data
+        user_id = user.id
+        user_obj = User.objects.get(id=user_id)
+        if user_obj:    
+            user_password = user_obj.password
+            old_password= data["old_password"]
+            checkPass = check_password(old_password, user_password)
 
-        return Response({'status': False, 'errors': serializer.errors, 'message': 'something went wrong'})
+            if checkPass:
+                serializer = USerChangePasswordSerializer(
+                    data=request.data, context={'user': request.user})
+                if serializer.is_valid():
+                    return Response({'Status': True,  "Message": "Password changed successfully !!!"})
+                else:
+                    return Response({"Data":serializer.errors})
+            else:
+                return Response({"Message": "Old password doesn't match !!!"})
+        else:
+            return Response({"Message": "user not found"})
 
 
 ######### SEND RESET PASSWORD EMAIL #########
@@ -258,12 +320,46 @@ class UserChangePasswordView(APIView):
 @authentication_classes([])
 @permission_classes([])
 class SendResetPasswordEmail(APIView):
+
+    def post(self, request):
+        data = request.data
+        try:
+            serializer = ResetPasswordEmailSerializer(data=data)
+            if serializer.is_valid():
+                email = serializer.data['email']
+                user = User.objects.filter(email=email)
+                if not user.exists():
+                    return Response({'Status': False, 'Data': "Invalid Email", 'Message': "Something went wrong"})
+                send_reset_password_otp_via_email(serializer.data['email'])
+                return Response({'Status': True,  'Message': "Please check your email !!!"})
+            return Response({'Status': False, 'Data': serializer.errors, 'Message': "Something went wrong"})
+
+        except Exception as e:
+            print(e)
+
+@authentication_classes([])
+@permission_classes([])
+class VerifyResetPasswordOTPView(APIView):
     
-    def post(self, request, format=None):
-        serializer = ResetPasswordEmailSerializer(data=request.data)
-        if serializer.is_valid():
-            return Response({'status': True,  "message": "Reset password link has been sent on your email"})
-        return Response({'status': False, 'errors': serializer.errors, 'message': 'something went wrong'})
+    def post(self, request):
+        data = request.data
+        try:
+            serializer = VerifyPasswoprdOTPSerializer(data=data)
+            if serializer.is_valid():
+                email = serializer.data['email']
+                otp = serializer.data['otp']
+
+                user = User.objects.filter(email=email)
+                if not user.exists():
+                    return Response({'Status': False, 'Data': "Invalid Email", 'Message': "User not found !!!"})
+
+                if user[0].otp != otp:
+                    return Response({'Status': False, 'Data': "Invalid OTP", 'Message': "Something went wrong"})
+
+                return Response({'Status': True,  'Message': "OTP verified successfully !!!"})
+            return Response({'Status': False, 'Data': serializer.errors, 'Message': "Something went wrong"})
+        except Exception as e:
+                print(e)
 
 
 ###### RESET PASSWORD ######
@@ -271,12 +367,23 @@ class SendResetPasswordEmail(APIView):
 @authentication_classes([])
 @permission_classes([])
 class PasswordResetView(APIView):
-    def post(self, request, uid, token,  format=None):
-        serializer = ResetPasswordChangeSerializer(data=request.data, context={'uid':uid, 'token':token})
-        if serializer.is_valid():
-            return Response({'status': True,  "message": "Password reset successfully"})
+    def post(self, request,  format=None):
+        data = request.data
+        user_email = data["email"]
+        password = data["password"]
+        cpassword = data["password2"]
+        try:
+            user_obj = User.objects.get(email = user_email)
 
-        return Response({'status': False, 'errors': serializer.errors, 'message': 'something went wrong'})
+            if password != cpassword:
+                return Response({"Status":False, "Message":"password and confirm password doesn't match"})
+            user_obj.set_password(password)
+            user_obj.save()
+            return Response({"Status":True, "Message": "Password Reset Successfully !!!"})
+        except Exception as e:
+            print(e)
+            return Response({'Status': False,  "Message": "User not found !!!"})
+
 
 
 

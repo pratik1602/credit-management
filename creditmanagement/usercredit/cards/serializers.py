@@ -1,10 +1,25 @@
 from rest_framework import serializers
 from usercredit.models import *
+from usercredit.serializers import *
+
+class UserSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = User
+        fields = ["id", "email", "first_name", "last_name", "profile_pic"]
+
 
 class CardSerializer(serializers.ModelSerializer):
-    # created_by = serializers.StringRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
-    # updated_by = serializers.StringRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
-    # commission_total_amount = models.FloatField( blank=True)
+    # user_id = serializers.SerializerMethodField()
+    # # created_by = serializers.StringRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
+    # # updated_by = serializers.StringRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
+    # # commission_total_amount = models.FloatField( blank=True)
+    # def get_user_id(obj):
+    #     user = User.objects.filter(id=obj.user_id)
+    #     user_id = UserSerializer(user)
+    #     return user_id.data
+
+
     commission = serializers.FloatField(read_only=True)
     class Meta:
         model = Card
@@ -25,7 +40,7 @@ class addCommissionSerializer(serializers.ModelSerializer):
 
 
 class AllCardSerializer(serializers.ModelSerializer):
-
+    user_id = UserSerializer()
     class Meta:
         model = Card
         fields = '__all__'

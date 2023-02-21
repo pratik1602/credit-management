@@ -11,9 +11,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 ###### CARD LIST ONLY ADMIN CAN VIEW #########
 
 class cardListGenerics(generics.ListAPIView):
+    permission_classes = [IsAdminUser]
     queryset = Card.objects.all()
     serializer_class = AllCardSerializer
-    permission_classes = [IsAdminUser]
     
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['card_id',]
@@ -21,12 +21,12 @@ class cardListGenerics(generics.ListAPIView):
 
 ###### CREDIT CARDS LIST, CREATE ,UPDATE AND DELETE #########
 
-
 class UserCardAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = get_object(request)
+        
         request.data["user_id"] = user.pk
         card_id = request.GET.get("card_id")
         if card_id != None or 0:
@@ -34,7 +34,7 @@ class UserCardAPIView(APIView):
         else:
             card_obj = Card.objects.filter(user_id=user)
         serializer = CardSerializer(card_obj, many=True)
-        return Response({"status": True, "message": "Card List", "data": serializer.data})
+        return Response({"Status": True, "Message": "Card List", "data": serializer.data})
 
     def post(self, request):
         user = get_object(request)
@@ -42,8 +42,8 @@ class UserCardAPIView(APIView):
         serializer = CardSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(created_by=self.request.user)
-            return Response({'status': True, "message": "Card Added Successfully"})
-        return Response({'status': False, "message": "something went wrong", "errors": serializer.errors})
+            return Response({'Status': True, "Message": "Card Added Successfully"})
+        return Response({'Status': False, "Message": "something went wrong", "errors": serializer.errors})
 
     def put(self, request, card_id):
         try:
@@ -72,10 +72,10 @@ class UserCardAPIView(APIView):
             card_obj.modified_at = now
 
             card_obj.save()
-            return Response({"status":True, "data":request.data, "message":"Data Updated"})
+            return Response({"Status":True, "Data":request.data, "Message":"Data Updated"})
 
         except:
-            return Response({'status': False, "message": "Card doesn't exists"})
+            return Response({'Status': False, "Message": "Card doesn't exists"})
 
     def delete(self, request, card_id):
         try:
@@ -84,10 +84,10 @@ class UserCardAPIView(APIView):
             card = Card.objects.get(card_id=card_id, user_id=user.id)
             if card is not None:
                 card.delete()
-                return Response({"status": True, "message": "Card deleted!"})
+                return Response({"Status": True, "Message": "Card deleted!"})
         except Exception as e:
             print(e)
-            return Response({"status": False, "message": "Card doesn't exists"})
+            return Response({"Status": False, "Message": "Card doesn't exists"})
 
 
 ###### PAYMENT API #######
@@ -110,10 +110,10 @@ class PaymentAPI(APIView):
             card_obj.card_status = True
 
             card_obj.save()
-            return Response({"status":True, "data":request.data, "message":"Payment successful"})
+            return Response({"Status":True, "Data":request.data, "Message":"Payment successful"})
 
         except:
-            return Response({'status': False, "message": "Card doesn't exists"})
+            return Response({'Status': False, "Message": "Card doesn't exists"})
 
 
 ######## ADD COMMISSION BY ADMIN ##########
@@ -132,11 +132,11 @@ class AddcommissionAPIView(APIView):
             card_obj.commission_total_amount = "%.2f" % float(commission_amount)
             card_obj.save()
             
-            return Response({"status":True, "data":request.data, "message":"Commission Added"})
+            return Response({"Status":True, "Data":request.data, "Message":"Commission Added"})
 
         except Exception as e:
             print(e)
-            return Response({"message": "Card Doesn't exists"})
+            return Response({"Message": "Card Doesn't exists"})
 
 
 

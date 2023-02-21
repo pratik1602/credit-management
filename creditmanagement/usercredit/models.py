@@ -21,6 +21,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     )   
 
     username = None
+    profile_pic =  models.ImageField(upload_to='',default="")
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=255, unique=True)
@@ -71,7 +72,7 @@ class User(AbstractBaseUser,PermissionsMixin):
 class Card(models.Model):  
 
     card_id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User, on_delete=models.PROTECT)
+    user_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     CARD_CHOICE = (("business", "BUSINESS"),
                 ("personal", "PERSONAL"),)
     card_bank_name = models.CharField(max_length=100)
@@ -85,9 +86,9 @@ class Card(models.Model):
     commission = models.FloatField(validators=percentage_validators, blank=True, null=True)
     due_amount = models.FloatField(default=0)
     card_status = models.BooleanField(default=False)
-    updated_by=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_by_user', on_delete=models.PROTECT,  null=True, blank=True)
-    created_by=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_by_user',on_delete=models.PROTECT,  null=True, blank=True)
-    paid_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='paid_by_user', on_delete=models.PROTECT, null=True, blank=True) 
+    updated_by=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_by_user', on_delete=models.SET_NULL,  null=True, blank=True)
+    created_by=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_by_user',on_delete=models.SET_NULL,  null=True, blank=True)
+    paid_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='paid_by_user', on_delete=models.SET_NULL, null=True, blank=True) 
     commission_total_amount = models.FloatField(null=True,blank=True)
     commission_paid_through = models.CharField(max_length=100)
     created_at = models.DateTimeField(default= datetime.now)

@@ -12,13 +12,23 @@ urlpatterns = [
     path('resend-otp/', ResendOTP.as_view()),
     path ('register-admin/', RegisterAdmin.as_view()),
 
+    ##### USER #####
+
     path ('user-profile/', UserProfileView.as_view()),
     path ('edit-profile/', UserProfileView.as_view()),
     path ('delete-profile/', UserProfileView.as_view()),
 
+    ##### ADMIN #####
+
+    path ('admin-profile/', AdminProfileView.as_view()),
+    path ('admin-edit-profile/', AdminProfileView.as_view()),
+    path ('admin-delete-profile/', AdminProfileView.as_view()),
+
+
     ###### LOGIN ######
 
     path('login-user/', LoginAPIView.as_view()),
+    path('login-admin/', LoginAPIView.as_view()),
     
     ###### ADMIN ######
 
@@ -29,7 +39,11 @@ urlpatterns = [
     ###### CHANGE PASSWORD ######
 
     path ('change-password/', UserChangePasswordView.as_view()),
+
+    ###### RESET PASSWORD ###### 
+       
     path('reset-password-email/', SendResetPasswordEmail.as_view()),
-    path('reset-password/<uid>/<token>/', PasswordResetView.as_view()),
+    path('verify-Reset-pass-OTP/', VerifyResetPasswordOTPView.as_view()),
+    path('reset-password/', PasswordResetView.as_view()),
 
 ]

@@ -18,7 +18,7 @@ class UserAdmin(BaseUserAdmin):
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
     list_display = ['id','email','aadhar_status','pan_status','cheque_status','is_admin', 'is_verified', 'role', 'commission_status']
-    list_filter = ['role', 'email',]
+    list_filter = ['role',]
     list_editable = ['aadhar_status','pan_status','cheque_status','is_verified']
     list_per_page = 10
     fieldsets = (
