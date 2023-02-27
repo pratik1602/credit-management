@@ -14,7 +14,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 
 import environ
-import dj_database_url
+# import dj_database_url
 
 
 env = environ.Env()
@@ -35,9 +35,9 @@ SECRET_KEY = 'django-insecure-t2c5md0n32ea+p#x=3+h+th%*9t^uqtjxjv4v9me)d$p)!*-wh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ "192.168.1.9"]
+ALLOWED_HOSTS = [ "192.168.1.15"]
 
-# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_WHITELIST = [
 #     "http://localhost:4200",
 #     "http://192.168.1.9:8080"
@@ -199,7 +199,7 @@ from datetime import timedelta
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1440),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=43200),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,
@@ -230,16 +230,17 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
 
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://192.168.1.9:8000",
 ]
 
+from decouple import config
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST= env('EMAIL_HOST')
+EMAIL_HOST= config('EMAIL_HOST')
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
-EMAIL_HOST_USER= env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD= env('EMAIL_HOST_PASSWORD')
-
+EMAIL_HOST_USER= config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD= config('EMAIL_HOST_PASSWORD')
 PASSWORD_RESET_TIMEOUT=900                # 900 sec = 15 min 
 
 OLD_PASSWORD_FIELD_ENABLED = True
@@ -249,5 +250,8 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+
+
+
 
 

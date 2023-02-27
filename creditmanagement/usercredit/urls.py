@@ -24,7 +24,6 @@ urlpatterns = [
     path ('admin-edit-profile/', AdminProfileView.as_view()),
     path ('admin-delete-profile/', AdminProfileView.as_view()),
 
-
     ###### LOGIN ######
 
     path('login-user/', LoginAPIView.as_view()),

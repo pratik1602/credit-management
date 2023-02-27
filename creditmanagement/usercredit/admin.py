@@ -72,13 +72,11 @@ class CardsAdmin(admin.ModelAdmin):
             obj.commission_total_amount = obj.due_amount * obj.commission/100
             obj.paid_by = request.user
             obj.card_status = True
-
         else:                    
             obj.created_by = request.user
-
+            obj.commission_total_amount = obj.due_amount * obj.commission/100
         obj.save()            
         return super(CardsAdmin, self).save_model(request, obj, form, change)
-
 
 admin.site.register(Card, CardsAdmin)
 

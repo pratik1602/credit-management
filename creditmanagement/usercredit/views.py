@@ -14,7 +14,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .utils import *
 from datetime import datetime
 from django.contrib.auth.hashers import check_password, make_password
-from django.contrib.auth import logout
 
 ### Create your views here. ###
 
@@ -24,7 +23,6 @@ def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     return str(refresh.access_token)
     
-
 ####### USER VIEWS ######
 
 class UserListGeneric(generics.ListAPIView):
@@ -34,7 +32,6 @@ class UserListGeneric(generics.ListAPIView):
     serializer_class = UserSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['id',]
-
 
 ######### REGISTRATION - USER #########
 
@@ -46,24 +43,44 @@ class RegisterUser(APIView):
         if not request.POST._mutable:
             request.POST._mutable = True
         data = request.data
-        try:
-            user = User.objects.get(refer_code=data['refer_code'])
-            request.data['referred_by'] = user.id
-        except:
-            return Response({"message":"Invalid Referral Code"})
-        try:
+        if data['refer_code']:
+            try:
+                user = User.objects.get(refer_code=data['refer_code'])
+                request.data['referred_by'] = user.id
+            except:
+                return Response({"message":"Invalid Referral Code"})
+        else:
             request.data['refer_code'] = generate_ref_code()
-
-            serializer = UserRegistrationSerializer(data=request.data)
-    
+            serializer = UserRegistrationSerializer(data=data)
             if serializer.is_valid(raise_exception=True):
+                serializer["reser_code"] = generate_ref_code()
                 serializer.save()
                 send_otp_via_email(serializer.data['email'])
-                
                 return Response({"Status": True, "Message": 'Registration Successful. Please check your email for verification', "Data": serializer.data})
-        except:
-            return Response({"Data":serializer.errors,"Message":"Something went wrong", "Status":False})
-       
+            else:
+                return Response({"Data":serializer.errors,"Message":"Something went wrong", "Status":False})
+
+
+        # if data['refer_code']:
+        #     try:
+        #         user = User.objects.get(refer_code=data['refer_code'])
+        #         request.data['referred_by'] = user.id
+        #     except:
+        #         return Response({"message":"Invalid Referral Code"})
+        # else:
+        #     try:
+        #         request.data['refer_code'] = generate_ref_code()
+
+        #         serializer = UserRegistrationSerializer(data=request.data)
+        
+        #         if serializer.is_valid(raise_exception=True):
+        #             serializer.save()
+        #             # send_otp_via_email(serializer.data['email']) ######################################################
+                    
+        #             return Response({"Status": True, "Message": 'Registration Successful. Please check your email for verification', "Data": serializer.data})
+        #     except:
+        #         return Response({"Data":serializer.errors,"Message":"Something went wrong", "Status":False})
+            
         
 ###### ADMIN REGISTER API ########
 
@@ -201,7 +218,7 @@ class LoginAPIView(APIView):
             elif user is None:
                 return Response({'Status':False,'Message':"Invalid credentials"}) 
             else:
-                send_otp_via_email(serializer.data['email'])
+                send_otp_via_email(serializer.data['email']) 
                 return Response({'Status':False,'Message':"You are not a verified user!!! Please check your email and get verified"})
              
         return Response({'Status':False, 'Data':serializer.errors,'Message':"something went wrong"})
@@ -279,7 +296,7 @@ class ResendOTP(APIView):
                 user = User.objects.filter(email=email)
                 if not user.exists():
                     return Response({'Status': False, 'Data': "Invalid Email", 'Message': "Something went wrong"})
-                send_otp_via_email(serializer.data['email'])
+                send_otp_via_email(serializer.data['email'])  
                 return Response({'Status': True,  'Message': "Please check your email again !!!"})
             return Response({'Status': False, 'Data': serializer.errors, 'Message': "Something went wrong"})
 
@@ -330,7 +347,7 @@ class SendResetPasswordEmail(APIView):
                 user = User.objects.filter(email=email)
                 if not user.exists():
                     return Response({'Status': False, 'Data': "Invalid Email", 'Message': "Something went wrong"})
-                send_reset_password_otp_via_email(serializer.data['email'])
+                send_reset_password_otp_via_email(serializer.data['email']) 
                 return Response({'Status': True,  'Message': "Please check your email !!!"})
             return Response({'Status': False, 'Data': serializer.errors, 'Message': "Something went wrong"})
 

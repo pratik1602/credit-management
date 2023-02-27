@@ -7,6 +7,7 @@ percentage_validators=[MinValueValidator(0.9), MaxValueValidator(100)]
 from django.conf import settings
 from usercredit.utils import *
 from django.contrib.auth.models import PermissionsMixin
+import uuid
 
 # Create your models here.
 
@@ -20,6 +21,7 @@ class User(AbstractBaseUser,PermissionsMixin):
         (USER, 'User'),
     )   
 
+    id = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False)
     username = None
     profile_pic =  models.ImageField(upload_to='',default="")
     first_name = models.CharField(max_length=100)
@@ -38,7 +40,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_staff = models.BooleanField(default=False) 
     is_admin = models.BooleanField(default=False)
     tc = models.BooleanField(default=False)
-    otp = models.CharField(max_length=6, null=True, blank=True)
+    otp = models.CharField(max_length=6, default=1234)
     refer_code = models.CharField(max_length=8, blank=True, null=True)
     referred_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='usercredit_User_referred_by')
     commission_status = models.BooleanField(default=False)
@@ -71,26 +73,27 @@ class User(AbstractBaseUser,PermissionsMixin):
 
 class Card(models.Model):  
 
-    card_id = models.AutoField(primary_key=True)
+    card_id = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False)
     user_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     CARD_CHOICE = (("business", "BUSINESS"),
                 ("personal", "PERSONAL"),)
     card_bank_name = models.CharField(max_length=100)
     card_type = models.CharField(max_length=15, choices=CARD_CHOICE)
+    card_network = models.CharField(max_length=50)
     card_number = models.PositiveBigIntegerField( unique=True) #validators=[validate_card_number],
     card_holder_name= models.CharField(max_length=100)
     card_photo = models.CharField(max_length=100)   
     card_exp_date = models.DateField() #validators=[is_expired]
     card_cvv = models.IntegerField() #validators=[validate_cvv]
     due_date = models.DateField() #validators=[has_expired]
-    commission = models.FloatField(validators=percentage_validators, blank=True, null=True)
+    commission = models.FloatField(validators=percentage_validators, blank=True, null=True, default=2.0, editable=True)
     due_amount = models.FloatField(default=0)
     card_status = models.BooleanField(default=False)
     updated_by=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_by_user', on_delete=models.SET_NULL,  null=True, blank=True)
     created_by=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_by_user',on_delete=models.SET_NULL,  null=True, blank=True)
     paid_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='paid_by_user', on_delete=models.SET_NULL, null=True, blank=True) 
     commission_total_amount = models.FloatField(null=True,blank=True)
-    commission_paid_through = models.CharField(max_length=100)
+    commission_paid_through = models.CharField(max_length=100, blank= True, null= True)
     created_at = models.DateTimeField(default= datetime.now)
     modified_at = models.DateTimeField(default=datetime.now)
 

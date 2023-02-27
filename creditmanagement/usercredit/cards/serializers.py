@@ -10,16 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CardSerializer(serializers.ModelSerializer):
-    # user_id = serializers.SerializerMethodField()
-    # # created_by = serializers.StringRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
-    # # updated_by = serializers.StringRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
-    # # commission_total_amount = models.FloatField( blank=True)
-    # def get_user_id(obj):
-    #     user = User.objects.filter(id=obj.user_id)
-    #     user_id = UserSerializer(user)
-    #     return user_id.data
-
-
+    
     commission = serializers.FloatField(read_only=True)
     class Meta:
         model = Card

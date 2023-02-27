@@ -38,18 +38,28 @@ class UserCardAPIView(APIView):
 
     def post(self, request):
         user = get_object(request)
-        request.data["user_id"] = user.pk
-        serializer = CardSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(created_by=self.request.user)
-            return Response({'Status': True, "Message": "Card Added Successfully"})
+        request.data["user_id"] = user.id
+        user_obj = User.objects.get(id=user.id)
+        if user_obj:
+            data = request.data
+            serializer = CardSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save( created_by=self.request.user)
+                getCard = Card.objects.get(card_id=serializer.data["card_id"])
+                due_amount = getCard.due_amount
+                commission = getCard.commission
+                getCard.commission_total_amount = due_amount * commission/100
+                getCard.save()
+                return Response({'Status': True, "Message": "Card Added Successfully"})
         return Response({'Status': False, "Message": "something went wrong", "errors": serializer.errors})
 
-    def put(self, request, card_id):
+        
+    def put(self, request):
         try:
             now = datetime.now()
             user = get_object(request)
             request.data["user_id"] = user.id
+            card_id = request.data["card_id"]
             card_obj = Card.objects.get(card_id=card_id, user_id=user.id)
 
             card_obj.card_bank_name = request.data["card_bank_name"]
@@ -72,7 +82,7 @@ class UserCardAPIView(APIView):
             card_obj.modified_at = now
 
             card_obj.save()
-            return Response({"Status":True, "Data":request.data, "Message":"Data Updated"})
+            return Response({"Status":True, "Message":"Card Updated succesfully !!!"})
 
         except:
             return Response({'Status': False, "Message": "Card doesn't exists"})
