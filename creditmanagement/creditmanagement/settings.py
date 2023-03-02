@@ -35,7 +35,7 @@ SECRET_KEY = 'django-insecure-t2c5md0n32ea+p#x=3+h+th%*9t^uqtjxjv4v9me)d$p)!*-wh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ "192.168.1.15"]
+ALLOWED_HOSTS = [ "*"]
 
 CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_WHITELIST = [
@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     "corsheaders",
     'django_filters',
     'usercredit',
+    'cards',
+    'transaction'
 ]
 
 MIDDLEWARE = [

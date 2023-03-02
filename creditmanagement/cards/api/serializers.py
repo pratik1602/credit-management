@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from usercredit.models import *
-from usercredit.serializers import *
+from usercredit.api.serializers import *
 
 class UserSerializer(serializers.ModelSerializer):
     
@@ -14,7 +14,7 @@ class CardSerializer(serializers.ModelSerializer):
     commission = serializers.FloatField(read_only=True)
     class Meta:
         model = Card
-        fields = ['card_id',"user_id",'card_bank_name','card_type', 'card_number','card_holder_name' ,'card_photo','card_exp_date' ,'card_cvv','due_date','due_amount','commission', 'card_status','updated_by', 'created_by', 'paid_by', "commission_total_amount"]
+        fields = ['card_id',"user_id",'card_bank_name','card_type', 'card_number','card_network','card_holder_name' ,'card_photo','card_exp_date' ,'card_cvv','due_date','due_amount','commission', 'card_status','updated_by', 'created_by', 'paid_by', "commission_total_amount"]
 
 
 class PaymentSerializer(serializers.ModelSerializer):

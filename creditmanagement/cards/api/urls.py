@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 
-from usercredit.cards.views import *
+from cards.api.views import *
 
 urlpatterns = [
    
@@ -10,7 +10,7 @@ urlpatterns = [
     path ('card-view/', UserCardAPIView.as_view()),
     path ('add-card/', UserCardAPIView.as_view()),
     path ('edit-card/', UserCardAPIView.as_view()),
-    path ('delete-card/<int:card_id>/', UserCardAPIView.as_view()),
+    path ('delete-card/', UserCardAPIView.as_view()),
 
     path ('card-payment/<int:card_id>/', PaymentAPI.as_view()),
 

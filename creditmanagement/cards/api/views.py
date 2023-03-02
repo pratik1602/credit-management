@@ -1,11 +1,12 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from usercredit.models import *
-from usercredit.cards.serializers import *
+from cards.api.serializers import *
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.views import APIView
 from usercredit.decode import get_object
 from django_filters.rest_framework import DjangoFilterBackend
+from datetime import datetime
 
 
 ###### CARD LIST ONLY ADMIN CAN VIEW #########
@@ -77,7 +78,7 @@ class UserCardAPIView(APIView):
             commission_amount = due_amount * commission/100
             card_obj.commission_total_amount = "%.2f" % float(commission_amount)
             card_obj.updated_by = request.user
-            card_obj.paid_by = request.user
+            # card_obj.paid_by = request.user
 
             card_obj.modified_at = now
 
@@ -87,14 +88,15 @@ class UserCardAPIView(APIView):
         except:
             return Response({'Status': False, "Message": "Card doesn't exists"})
 
-    def delete(self, request, card_id):
+    def delete(self, request):
         try:
             user = get_object(request)
+            card_id = request.GET.get("card_id")
             request.data["user_id"] = user.id
             card = Card.objects.get(card_id=card_id, user_id=user.id)
             if card is not None:
                 card.delete()
-                return Response({"Status": True, "Message": "Card deleted!"})
+                return Response({"Status": True, "Message": "Card deleted successfully !!!"})
         except Exception as e:
             print(e)
             return Response({"Status": False, "Message": "Card doesn't exists"})

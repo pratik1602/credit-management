@@ -1,9 +1,6 @@
 from rest_framework import serializers
-from .models import *
-from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from .emails import *
+from usercredit.models import *
+from usercredit.emails import *
 from django.core.validators import MaxValueValidator, MinValueValidator
 percentage_validators=[MinValueValidator(0.1), MaxValueValidator(100)]
 
@@ -14,7 +11,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['first_name', 'last_name','password', 'password2','email', 'phone_no', 'aadhar', 'pan', 'cheque', 'refer_code', 'referred_by']
+        fields = ['id','first_name', 'last_name','password', 'password2','email', 'phone_no', 'aadhar', 'pan', 'cheque', 'refer_code', 'referred_by', 'under_by', 'tc', 'role', 'created_by']
 
         extra_kwargs = {
             'password' : {'write_only' : True},
@@ -30,6 +27,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
+        validated_data["refer_code"] = generate_ref_code()
         validated_data["role"] = 2
         
         return User.objects.create_user(**validated_data)
@@ -139,58 +137,6 @@ class ResetPasswordEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
 
-
-# ###### RESET PASSWORD  ########
-
-# class ResetPasswordChangeSerializer(serializers.ModelSerializer):
-#     email = serializers.EmailField(max_length=255)
-#     password = serializers.CharField(max_length=255, style={'input_type':'password'}, write_only=True)
-#     password2 = serializers.CharField(max_length=255, style={'input_type':'password'}, write_only=True)
-
-#     class Meta:
-#         model = User
-#         fields = ['email','password','password2']
-
-#         extra_kwargs = {
-#             'password' : {'write_only' : True},
-#         }
-
-#     def validate(self, attrs):
-#         password = attrs.get('password')
-#         password2 = attrs.get('password2')
-#         if password != password2:
-#             raise serializers.ValidationError("password and confirm password dosen't match")
-#         user = attrs.get('user')
-#         user.set_password(password)
-#         user.save()
-#         return super().validate(attrs)
-
-#### RESET PASSWORD #####
-    
-# class UserRegistrationSerializer(serializers.ModelSerializer):
-#     password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
-    
-#     class Meta:
-#         model = User
-#         fields = ['first_name', 'last_name','password', 'password2','email', 'phone_no', 'aadhar', 'pan', 'cheque', 'refer_code', 'referred_by']
-
-#         extra_kwargs = {
-#             'password' : {'write_only' : True},
-#         }
-
-#     def validate(self, attrs):
-#         password = attrs.get('password')
-#         password2 = attrs.get('password2')
-
-#         if password != password2:
-#             raise serializers.ValidationError("password and confirm password dosen't match")
-
-#         return super().validate(attrs)
-
-#     def create(self, validated_data):
-#         validated_data["role"] = 2
-        
-#         return User.objects.create_user(**validated_data)
 
 
 

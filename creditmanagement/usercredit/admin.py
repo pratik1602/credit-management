@@ -23,7 +23,7 @@ class UserAdmin(BaseUserAdmin):
     list_per_page = 10
     fieldsets = (
         ('User Credentials', {'fields': ('email','password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'phone_no', 'aadhar','aadhar_status','pan','pan_status','cheque','cheque_status','otp' ,'refer_code','referred_by','tc', 'commission_status','user_created_at','user_modified_at')}),
+        ('Personal info', {'fields': ('under_by','first_name', 'last_name', 'phone_no', 'aadhar','aadhar_status','pan','pan_status','cheque','cheque_status','otp' ,'refer_code','referred_by','tc', 'commission_status','created_by','user_created_at','modified_by', 'user_modified_at')}),
         ('Permissions', {'fields': ('is_admin', 'is_active', 'is_staff', 'is_verified', 'role')}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
@@ -59,7 +59,7 @@ admin.site.register(User, UserAdmin)
 class CardsAdmin(admin.ModelAdmin):
     list_display = ['card_id', 'card_holder_name','card_type','due_date', 'due_amount', 'commission','commission_total_amount', 'paid_by','card_status']
     list_filter = ('card_status', 'card_type' )
-    search_fields = ('card_holder_name',)
+    search_fields = ('card_holder_name','card_id',)
     list_editable = ['commission', 'card_status']
     readonly_fields = ('created_at','modified_at',)
     ordering = ('card_id',)
@@ -80,3 +80,7 @@ class CardsAdmin(admin.ModelAdmin):
 
 admin.site.register(Card, CardsAdmin)
 
+
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ['transaction_id', 'card', 'amount_paid','commission', 'profit_amount']
+admin.site.register(Transaction, TransactionAdmin)

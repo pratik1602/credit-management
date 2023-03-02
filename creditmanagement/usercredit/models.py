@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import  AbstractBaseUser
-from usercredit.cards.validate import *
+from cards.api.validate import *
 from usercredit.manager import *
 from django.core.validators import MaxValueValidator, MinValueValidator
 percentage_validators=[MinValueValidator(0.9), MaxValueValidator(100)]
@@ -40,7 +40,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     is_staff = models.BooleanField(default=False) 
     is_admin = models.BooleanField(default=False)
     tc = models.BooleanField(default=False)
-    otp = models.CharField(max_length=6, default=1234)
+    otp = models.CharField(max_length=6)
     refer_code = models.CharField(max_length=8, blank=True, null=True)
     referred_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='usercredit_User_referred_by')
     commission_status = models.BooleanField(default=False)
@@ -48,12 +48,12 @@ class User(AbstractBaseUser,PermissionsMixin):
     modified_by =  models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='usercredit_User_modified_by')
     user_created_at = models.DateTimeField(default=datetime.now)
     user_modified_at = models.DateTimeField(default=datetime.now)
+    under_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='usercredit_User_under_by')
     
     USERNAME_FIELD =  'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'phone_no', ]
 
     objects = UserManager()
-
 
     def has_perm(self, perm, obj=None):
         return self.is_admin
@@ -75,10 +75,10 @@ class Card(models.Model):
 
     card_id = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False)
     user_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    CARD_CHOICE = (("business", "BUSINESS"),
-                ("personal", "PERSONAL"),)
+    # CARD_CHOICE = (("business", "BUSINESS"),
+    #             ("personal", "PERSONAL"),)
     card_bank_name = models.CharField(max_length=100)
-    card_type = models.CharField(max_length=15, choices=CARD_CHOICE)
+    card_type = models.CharField(max_length=20)
     card_network = models.CharField(max_length=50)
     card_number = models.PositiveBigIntegerField( unique=True) #validators=[validate_card_number],
     card_holder_name= models.CharField(max_length=100)
@@ -99,3 +99,18 @@ class Card(models.Model):
 
     def __str__(self):
         return self.card_bank_name      
+
+
+class Transaction(models.Model):
+    transaction_id = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False)
+    admin = models.ForeignKey(User, on_delete=models.CASCADE,null=True, related_name="admin_id")
+    # card_holder_id = models.ForeignKey(Card, on_delete=models.SET_NULL, null=True, related_name="card_holder_id")
+    card = models.ForeignKey(Card, on_delete=models.SET_NULL, null=True, related_name="user_card_id")
+    due_paid_through = models.CharField(max_length=100)
+    amount_paid = models.FloatField(default=0)
+    commission = models.FloatField(validators=percentage_validators, blank=True, null=True, default=2.0, editable=True)
+    profit_amount = models.FloatField(null=True,blank=True)
+    paid_at = models.DateTimeField(default= datetime.now)
+
+    def __str__(self) :
+        return self.due_paid_through

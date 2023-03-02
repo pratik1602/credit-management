@@ -21,8 +21,10 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path ('api/user/', include('usercredit.urls')),
-    path ('api/cards/', include('usercredit.cards.urls')),
+    path ('api/user/', include('usercredit.api.urls')),
+    path ('api/cards/', include('cards.api.urls')),
+    path ('api/transaction/', include('transaction.api.urls')),
+
 ]
 
 if settings.DEBUG:
