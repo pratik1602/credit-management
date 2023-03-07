@@ -2,12 +2,6 @@ from rest_framework import serializers
 from usercredit.models import *
 from usercredit.api.serializers import *
 
-class UserSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = User
-        fields = ["id", "email", "first_name", "last_name", "profile_pic"]
-
 
 class CardSerializer(serializers.ModelSerializer):
     
@@ -29,6 +23,11 @@ class addCommissionSerializer(serializers.ModelSerializer):
         model = Card
         fields = ['commission']
 
+class UserSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = User
+        fields = ["id", "email", "first_name", "last_name", "profile_pic", "under_by"]
 
 class AllCardSerializer(serializers.ModelSerializer):
     user_id = UserSerializer()

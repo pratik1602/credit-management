@@ -17,9 +17,9 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ['id','email','aadhar_status','pan_status','cheque_status','is_admin', 'is_verified', 'role', 'commission_status']
+    list_display = ['id','email', 'is_verified', 'is_admin','under_by'] #'aadhar_status','pan_status','cheque_status', 'commission_status', 
     list_filter = ['role',]
-    list_editable = ['aadhar_status','pan_status','cheque_status','is_verified']
+    list_editable = ['is_verified'] #'aadhar_status','pan_status','cheque_status',
     list_per_page = 10
     fieldsets = (
         ('User Credentials', {'fields': ('email','password')}),
@@ -83,4 +83,15 @@ admin.site.register(Card, CardsAdmin)
 
 class TransactionAdmin(admin.ModelAdmin):
     list_display = ['transaction_id', 'card', 'amount_paid','commission', 'profit_amount']
+
+    def save_model(self, request, obj, form, change):
+
+        if change:
+            obj.profit_amount = obj.amount_paid * obj.commission/100
+            obj.paid_at = datetime.now()
+        else:                    
+            obj.profit_amount = obj.amount_paid * obj.commission/100
+        obj.save()            
+        return super(TransactionAdmin, self).save_model(request, obj, form, change)
+
 admin.site.register(Transaction, TransactionAdmin)

@@ -14,13 +14,13 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 
 import environ
-# import dj_database_url
-
 
 env = environ.Env()
 environ.Env.read_env()
 
 from pathlib import Path
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,12 +30,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-t2c5md0n32ea+p#x=3+h+th%*9t^uqtjxjv4v9me)d$p)!*-wh'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ "*"]
+ALLOWED_HOSTS = ["*"]
 
 CORS_ORIGIN_ALLOW_ALL = True
 # CORS_ORIGIN_WHITELIST = [
@@ -98,11 +98,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'creditmanagement.wsgi.application' 
-
-
-# DATABASES = {
-#     "default": dj_database_url.parse(os.environ.get("DATABASE_URL"))
-# }
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -235,7 +230,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.1.9:8000",
 ]
 
-from decouple import config
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST= config('EMAIL_HOST')

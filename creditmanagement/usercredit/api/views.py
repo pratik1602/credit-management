@@ -23,15 +23,34 @@ def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     return str(refresh.access_token)
     
-####### USER VIEWS ######
+####### USER LIST ######
 
-class UserListGeneric(generics.ListAPIView):
-    permission_classes = [IsAdminUser]
+class GetUserList(APIView):
+    permission_classes = [IsAuthenticated&IsAdminUser]
 
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id',]
+    def get(self, request):
+        admin = get_object(request)
+        request.data["user_id"] = admin.id
+        get_admin = User.objects.get(id = admin.id)
+        if get_admin:
+            user_id = request.GET.get("id")
+            if user_id != None or 0:
+                try:
+                    user_obj = User.objects.get(under_by = admin, id = user_id)
+                    serializer = UserSerializer(user_obj)
+                    return Response({"Status": True, "Message": "User !!!", "data": serializer.data})
+                except:
+                    return Response({"Status": False, "Message": "No User found !!!"})
+            else:
+                user_objs = User.objects.filter(under_by = admin)
+                if user_objs:
+                    serializer = UserSerializer(user_objs, many=True)
+                    return Response({"Status": True, "Message": "Users List !!!", "data": serializer.data})
+                else:
+                    return Response({"Status": False, "Message": "No Users found !!!"})  
+        else:
+            return Response({"Status": False, "Message":"No Admin Found !!!"})
+
 
 ######### REGISTRATION - USER #########
 
@@ -197,7 +216,7 @@ class DeleteUserView(APIView):
             return Response({'Status':True,'Message':"User Deleted Successfully"})
         except Exception as e:
             print(e)
-            return Response({'Status':False, 'Message':"Invalid User Id"})
+            return Response({'Status':False, 'Message':"User not found !!!"})
 
 
 ######## LOGIN USER #############

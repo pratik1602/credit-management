@@ -104,7 +104,6 @@ class Card(models.Model):
 class Transaction(models.Model):
     transaction_id = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False)
     admin = models.ForeignKey(User, on_delete=models.CASCADE,null=True, related_name="admin_id")
-    # card_holder_id = models.ForeignKey(Card, on_delete=models.SET_NULL, null=True, related_name="card_holder_id")
     card = models.ForeignKey(Card, on_delete=models.SET_NULL, null=True, related_name="user_card_id")
     due_paid_through = models.CharField(max_length=100)
     amount_paid = models.FloatField(default=0)
